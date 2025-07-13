@@ -9,31 +9,106 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        /* Custom Styles */
+        /* Custom Fonts */
         body {
             font-family: 'Lora', serif;
-            transition: background-color 0.5s, color 0.5s;
+            /* Smooth transition for theme changes */
+            transition: background-color 0.8s ease-in-out, color 0.8s ease-in-out;
         }
         h1, h2, h3, .nav-item, .button, button, input, select, textarea {
             font-family: 'Inter', sans-serif;
         }
-        .theme-f {
-            --bg-color: #4a1d2e; /* Deep Burgundy */
-            --text-color: #f3e5e4; /* Pale Rose */
-            --accent-color: #e5a9a9; /* Muted Pink */
-            --highlight-bg: #6b2d43; /* Darker Burgundy */
-            --input-bg: #8a3b58;
-        }
-        .theme-m {
-            --bg-color: #1e293b; /* Slate Blue */
-            --text-color: #e2e8f0; /* Light Slate */
-            --accent-color: #94a3b8; /* Lighter Slate */
-            --highlight-bg: #334155; /* Darker Slate */
-            --input-bg: #475569;
-        }
+
+        /* Base Theme (Dark Backgrounds, Light Text) */
         body {
+            --text-color-light: #f8fafc; /* Very light off-white for general text */
+            --text-color-white: #ffffff; /* Pure white for titles */
+            --text-color-dark: #1a202c; /* Dark gray for specific elements (reads as black) */
+            --accent-color: #a78bfa; /* Light purple for highlights/links */
+            --input-bg-dark: #334155; /* Darker gray for input fields */
+            --border-color-dark: #64748b; /* Medium gray for borders */
+
+            color: var(--text-color-light); /* Default text color */
+        }
+
+        /* Female POV Specific Styles: Dark Pink Background */
+        body.theme-f {
+            --bg-color: #4a1d2e; /* Deep Burgundy / Dark Pink */
+            --header-footer-bg: #3a1624; /* Darker Pink for header/footer */
             background-color: var(--bg-color);
-            color: var(--text-color);
+        }
+        body.theme-f .chapter-text {
+            color: var(--text-color-light); /* Ensure text is light on dark pink */
+        }
+
+        /* Male POV Specific Styles: Dark Blue Background */
+        body.theme-m {
+            --bg-color: #1e293b; /* Slate Blue / Dark Blue */
+            --header-footer-bg: #15202b; /* Darker Blue for header/footer */
+            background-color: var(--bg-color);
+        }
+        body.theme-m .chapter-text {
+            color: var(--text-color-light); /* Ensure text is light on dark blue */
+        }
+
+        /* Elements that use highlight-bg-light for contrast */
+        .form-card, .modal-content, #chapter-list > div, #glossary-list > div {
+            background-color: var(--highlight-bg-light);
+        }
+        /* Header and Navigation (Footer) Backgrounds */
+        header, nav {
+            background-color: var(--header-footer-bg); /* Match theme's darker shade */
+            /* Removed border-bottom/top */
+        }
+
+        /* Specific Header Styling */
+        #user-id-display {
+            color: var(--text-color-white); /* ID and number white */
+        }
+        #pov-indicator {
+            color: var(--text-color-dark); /* (Female POV)/(Male POV) text black */
+        }
+        #pov-toggle-btn {
+            background-color: #64748b; /* Gray for switch button */
+            color: white; /* White text on switch button */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s; /* Smooth pop-up transition & color */
+        }
+        #pov-toggle-btn:hover {
+            transform: translateY(-2px); /* Pops up slightly */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Adds shadow for "pop" effect */
+            background-color: #475569; /* Darker gray on hover */
+        }
+        #pov-toggle-btn.clicked { /* Class for click animation */
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        /* Chapter Selector Dropdown Styling */
+        #chapter-selector {
+            background-color: var(--input-bg-dark); /* Dark background */
+            color: var(--text-color-light); /* Light text */
+            border: 1px solid var(--border-color-dark);
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 0.75rem; /* p-2 */
+            appearance: none; /* Remove default dropdown arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23f8fafc'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E"); /* Custom arrow */
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        #chapter-selector:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+
+        /* General UI Elements */
+        h1, h2, h3 {
+            color: var(--text-color-white); /* Titles are pure white */
         }
         .glossary-term {
             cursor: pointer;
@@ -42,90 +117,154 @@
             text-decoration: underline dotted;
             text-decoration-thickness: 1px;
         }
-        .prose { color: var(--text-color); }
+        .prose { color: var(--text-color-light); } /* Ensure prose text is light */
         .prose p { margin-bottom: 1em; }
-        .nav-item.active { background-color: var(--highlight-bg); }
-        .modal-content, .author-form { background-color: var(--highlight-bg); }
-        .author-mode-ui { display: none; }
-        body.author-mode .author-mode-ui { display: block; }
-        .author-form input, .author-form textarea, .author-form select {
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--accent-color);
+        .nav-item { color: var(--text-color-light); } /* Nav items light text */
+        .nav-item.active { background-color: var(--accent-color); color: var(--text-color-white); }
+        .nav-item:hover { background-color: #334155; } /* Darker hover for nav */
+
+        .form-card input, .form-card textarea, .form-card select {
+            background-color: var(--input-bg-dark);
+            color: var(--text-color-light); /* Input text is light */
+            border: 1px solid var(--border-color-dark);
         }
-        .author-form input::placeholder, .author-form textarea::placeholder {
-            color: var(--text-color);
+        .form-card input::placeholder, .form-card textarea::placeholder {
+            color: var(--text-color-light);
             opacity: 0.7;
         }
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+            color: white; /* Default button text color */
+        }
+        .button.primary { background-color: #6366f1; } /* indigo-500 */
+        .button.primary:hover { background-color: #4f46e5; } /* indigo-600 */
+        .button.success { background-color: #10b981; } /* green-600 */
+        .button.success:hover { background-color: #059669; } /* green-700 */
+        .button.danger { background-color: #ef4444; } /* red-500 */
+        .button.danger:hover { background-color: #dc2626; } /* red-600 */
+        .button.secondary { background-color: #64748b; } /* gray-500 */
+        .button.secondary:hover { background-color: #475569; } /* gray-600 */
+
+        /* Modal close button */
+        .close-modal-btn {
+            color: var(--text-color-light);
+            font-weight: normal;
+        }
+        .close-modal-btn:hover {
+            color: var(--text-color-white);
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Light spinner border */
+            border-left-color: var(--accent-color); /* Accent color for spinning part */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Expose Firebase objects to the global scope for use in the main script
+        window.firebase = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, collection, query, onSnapshot, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp };
+    </script>
 </head>
 <body class="antialiased">
 
-    <header class="sticky top-0 z-20 shadow-lg" style="background-color: var(--highlight-bg);">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 id="story-title-header" class="text-xl md:text-2xl font-bold" style="color: var(--accent-color);"></h1>
+    <!-- Header -->
+    <header class="sticky top-0 z-20 shadow-lg py-3">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 id="story-title-header" class="text-xl md:text-2xl font-bold"></h1>
             <div class="flex items-center space-x-2">
-                <button id="pov-toggle-btn" class="button px-3 py-1.5 text-sm font-bold rounded-md transition-all duration-300">Switch POV</button>
-                <label for="author-mode-toggle" class="text-sm cursor-pointer select-none">Author Mode</label>
-                <input type="checkbox" id="author-mode-toggle" class="ml-1 h-4 w-4 rounded">
+                <span id="user-id-display" class="text-xs md:text-sm mr-2"></span>
+                <button id="pov-toggle-btn" class="button secondary px-3 py-1.5 text-sm font-bold rounded-md">Switch POV</button>
             </div>
         </div>
-    </header> <main class="container mx-auto p-4 md:p-6">
+    </header>
 
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-6">
+
+        <!-- Reader View -->
         <div id="reader-view" class="main-section">
-            <h2 id="chapter-title" class="text-2xl md:text-3xl font-bold mb-2 text-center" style="color: var(--accent-color);"></h2>
+            <div class="flex flex-col sm:flex-row justify-center items-center mb-2 gap-2">
+                <h2 id="chapter-title" class="text-2xl md:text-3xl font-bold text-center"></h2>
+                <select id="chapter-selector" class="px-3 py-1.5 text-sm rounded-md"></select>
+            </div>
             <p id="pov-indicator" class="text-center italic mb-6"></p>
-            <div id="chapter-content" class="prose prose-lg max-w-none leading-relaxed"></div>
-            <div id="no-content-message" class="text-center py-10">
+            <div id="chapter-content" class="prose prose-lg max-w-none leading-relaxed chapter-text"></div>
+            <div id="no-content-message" class="text-center py-10 hidden">
                 <h2 class="text-2xl font-bold mb-4">Welcome!</h2>
                 <p>It looks like there are no stories yet.</p>
-                <p class="mt-2">Enable "Author Mode" in the top-right corner to start creating.</p>
+                <p class="mt-2">Click the "Chapters" tab and then "Create New Story" to get started!</p>
+            </div>
+            <div class="flex justify-between mt-8">
+                <button id="prev-chapter-btn" class="button secondary px-4 py-2 rounded-md">&larr; Previous</button>
+                <button id="next-chapter-btn" class="button secondary px-4 py-2 rounded-md">Next &rarr;</button>
             </div>
         </div>
 
+        <!-- Chapter/Story Management View -->
         <div id="management-view" class="main-section hidden">
-            <div class="mb-6">
+            <!-- Story Selector -->
+            <div class="mb-6 form-card p-4">
                 <label for="story-selector" class="block mb-2 font-bold">Current Story</label>
-                <div class="flex gap-2">
-                    <select id="story-selector" class="w-full p-2 rounded-md"></select>
-                    <button id="delete-story-btn" class="author-mode-ui button bg-red-700 hover:bg-red-800 px-3 py-2 rounded-md">Delete</button>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <select id="story-selector" class="flex-grow p-2 rounded-md"></select>
+                    <button id="create-new-story-btn" class="button success px-3 py-2 rounded-md">Create New Story</button>
+                    <button id="delete-story-btn" class="button danger px-3 py-2 rounded-md">Delete Story</button>
                 </div>
             </div>
 
-            <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--accent-color);">Chapter List</h2>
+            <!-- Chapter List -->
+            <h2 class="text-2xl font-bold mb-4 text-center">Chapter List</h2>
             <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-            <div class="author-mode-ui mt-8">
-                <div class="author-form p-6 rounded-lg">
-                    <h3 id="chapter-form-title" class="text-xl font-bold mb-4">Add New Chapter</h3>
-                    <input type="hidden" id="chapter-edit-index">
-                    <input id="new-chapter-title" type="text" placeholder="Chapter Title" class="w-full p-2 mb-2 rounded-md">
-                    <textarea id="new-chapter-f-pov" placeholder="Female POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
-                    <textarea id="new-chapter-m-pov" placeholder="Male POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
-                    <div class="flex gap-2">
-                        <button id="save-chapter-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Save Chapter</button>
-                        <button id="cancel-edit-chapter-btn" class="button bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md hidden">Cancel</button>
-                    </div>
+            <!-- Add/Edit Chapter Form -->
+            <div class="mt-8 form-card p-6">
+                <h3 id="chapter-form-title" class="text-xl font-bold mb-4">Add New Chapter</h3>
+                <input type="hidden" id="chapter-edit-index">
+                <input id="new-chapter-title" type="text" placeholder="Chapter Title" class="w-full p-2 mb-2 rounded-md">
+                <textarea id="new-chapter-f-pov" placeholder="Female POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
+                <textarea id="new-chapter-m-pov" placeholder="Male POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
+                <div class="flex gap-2 mt-4">
+                    <button id="save-chapter-btn" class="button success px-4 py-2 rounded-md">Save Chapter</button>
+                    <button id="cancel-edit-chapter-btn" class="button secondary px-4 py-2 rounded-md hidden">Cancel</button>
                 </div>
             </div>
         </div>
 
+        <!-- World Info View -->
         <div id="world-view" class="main-section hidden">
-             <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--accent-color);">Glossary</h2>
+             <!-- Glossary List -->
+            <h2 class="text-2xl font-bold mb-4 text-center">Glossary</h2>
             <div id="glossary-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
 
-            <div class="author-mode-ui mt-8">
-                <div class="author-form p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4">Add/Edit Glossary Term</h3>
-                    <input id="new-glossary-term" type="text" placeholder="Term" class="w-full p-2 mb-2 rounded-md">
-                    <textarea id="new-glossary-definition" placeholder="Definition" rows="3" class="w-full p-2 mb-2 rounded-md"></textarea>
-                    <button id="save-glossary-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Save Term</button>
-                </div>
+            <!-- Add/Edit Glossary Term Form -->
+            <div class="mt-8 form-card p-6">
+                <h3 class="text-xl font-bold mb-4">Add/Edit Glossary Term</h3>
+                <input id="new-glossary-term" type="text" placeholder="Term" class="w-full p-2 mb-2 rounded-md">
+                <textarea id="new-glossary-definition" placeholder="Definition" rows="3" class="w-full p-2 mb-2 rounded-md"></textarea>
+                <button id="save-glossary-btn" class="button success px-4 py-2 rounded-md">Save Term</button>
             </div>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 z-30" style="background-color: var(--highlight-bg);">
-            <div class="container mx-auto flex justify-around border-t" style="border-color: var(--bg-color);">
+        <!-- Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 z-30 shadow-lg">
+            <div class="container mx-auto flex justify-around border-t" style="border-color: var(--border-color-dark);">
                 <button data-target="reader" class="nav-item flex-1 py-3 text-center font-semibold active">Read</button>
                 <button data-target="management" class="nav-item flex-1 py-3 text-center font-semibold">Chapters</button>
                 <button data-target="world" class="nav-item flex-1 py-3 text-center font-semibold">World</button>
@@ -133,49 +272,48 @@
         </nav>
     </main>
 
+    <!-- Modals -->
     <div id="modal-backdrop" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 hidden">
-        <div id="glossary-modal-content" class="modal-content w-full max-w-md p-6 rounded-lg shadow-xl relative hidden">
-            <h3 id="modal-term" class="text-2xl font-bold mb-3" style="color: var(--accent-color);"></h3>
+        <!-- Glossary Modal -->
+        <div id="glossary-modal-content" class="modal-content w-full max-w-md p-6 relative hidden">
+            <h3 id="modal-term" class="text-2xl font-bold mb-3"></h3>
             <p id="modal-definition" class="text-base"></p>
             <button class="close-modal-btn absolute top-3 right-3 text-2xl font-bold">&times;</button>
         </div>
-        <div id="add-story-modal-content" class="modal-content w-full max-w-md p-6 rounded-lg shadow-xl relative hidden">
-            <h3 class="text-2xl font-bold mb-4" style="color: var(--accent-color);">Create New Story</h3>
-            <input id="new-story-title" type="text" placeholder="Story Title" class="w-full p-2 mb-4 rounded-md author-form">
+        <!-- Custom Alert/Confirm Modal -->
+        <div id="custom-alert-modal" class="modal-content w-full max-w-sm p-6 relative hidden">
+            <h3 id="alert-title" class="text-xl font-bold mb-4"></h3>
+            <p id="alert-message" class="mb-6"></p>
             <div class="flex justify-end gap-2">
-                 <button class="close-modal-btn button bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md">Cancel</button>
-                 <button id="save-story-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Create</button>
+                <button id="alert-cancel-btn" class="button secondary px-4 py-2 rounded-md hidden">Cancel</button>
+                <button id="alert-ok-btn" class="button primary px-4 py-2 rounded-md">OK</button>
             </div>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="spinner"></div>
+    </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- DATA STORE ---
-        let stories = [];
+    <script type="module">
+        // Import Firebase functions from the global window object (exposed by the script type="module" above)
+        const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, collection, query, onSnapshot, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } = window.firebase;
 
-        const defaultStory = {
-            title: "The Crimson Prophecy",
-            chapters: [
-                {
-                    title: "Chapter 1: The Whispering Woods",
-                    f_pov: `The air in the <span class="glossary-term">Whispering Woods</span> was thick with an ancient stillness. I clutched the <span class="glossary-term">Sunstone</span> in my pocket...`,
-                    m_pov: `This forest was a cursed place. The <span class="glossary-term">Whispering Woods</span> played tricks on the mind...`
-                }
-            ],
-            glossary: {
-                "Whispering Woods": "A sentient, ancient forest...",
-                "Sunstone": "A powerful artifact of the Dawn Age...",
-            }
-        };
+        // --- GLOBAL VARIABLES (Firebase & App State) ---
+        // These are provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- STATE MANAGEMENT ---
+        let app, db, auth, userId = 'anonymous'; // Default to anonymous until authenticated
+        let isAuthReady = false; // Flag to ensure Firestore operations happen after auth
+
+        let stories = []; // Local cache of story data from Firestore
         let state = {
-            currentStoryIndex: 0,
+            currentStoryId: null, // Stores Firestore document ID
             currentChapterIndex: 0,
             currentPOV: 'f',
-            isAuthorMode: false,
             editingChapterIndex: null,
         };
 
@@ -187,15 +325,20 @@
         const chapterContent = document.getElementById('chapter-content');
         const storyTitleHeader = document.getElementById('story-title-header');
         const noContentMessage = document.getElementById('no-content-message');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const chapterSelector = document.getElementById('chapter-selector'); // New chapter selector
 
         const mainSections = document.querySelectorAll('.main-section');
         const navItems = document.querySelectorAll('.nav-item');
 
-        const authorModeToggle = document.getElementById('author-mode-toggle');
-
         // Story Management
         const storySelector = document.getElementById('story-selector');
+        const createNewStoryBtn = document.getElementById('create-new-story-btn');
         const deleteStoryBtn = document.getElementById('delete-story-btn');
+
+        // Chapter Navigation
+        const prevChapterBtn = document.getElementById('prev-chapter-btn');
+        const nextChapterBtn = document.getElementById('next-chapter-btn');
 
         // Chapter Management
         const chapterListContainer = document.getElementById('chapter-list');
@@ -205,7 +348,6 @@
         const newChapterMPov = document.getElementById('new-chapter-m-pov');
         const saveChapterBtn = document.getElementById('save-chapter-btn');
         const cancelEditChapterBtn = document.getElementById('cancel-edit-chapter-btn');
-        const chapterEditIndexInput = document.getElementById('chapter-edit-index');
 
         // Glossary Management
         const glossaryListContainer = document.getElementById('glossary-list');
@@ -216,87 +358,339 @@
         // Modals
         const modalBackdrop = document.getElementById('modal-backdrop');
         const glossaryModalContent = document.getElementById('glossary-modal-content');
-        const addStoryModalContent = document.getElementById('add-story-modal-content');
         const modalTerm = document.getElementById('modal-term');
         const modalDefinition = document.getElementById('modal-definition');
-        const newStoryTitleInput = document.getElementById('new-story-title');
-        const saveStoryBtn = document.getElementById('save-story-btn');
+        const customAlertModal = document.getElementById('custom-alert-modal');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok-btn');
+        const alertCancelBtn = document.getElementById('alert-cancel-btn');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
-        // --- DATA HANDLING ---
-        function saveData() {
-            localStorage.setItem('interactiveNovelData', JSON.stringify(stories));
-            localStorage.setItem('interactiveNovelState', JSON.stringify(state));
+        // --- UTILITY FUNCTIONS ---
+
+        // Custom Alert/Confirm Dialog
+        function showCustomAlert(title, message, isConfirm = false) {
+            return new Promise((resolve) => {
+                alertTitle.textContent = title;
+                alertMessage.textContent = message;
+                alertCancelBtn.classList.toggle('hidden', !isConfirm);
+                alertOkBtn.textContent = isConfirm ? 'Confirm' : 'OK';
+
+                modalBackdrop.classList.remove('hidden');
+                customAlertModal.classList.remove('hidden');
+
+                const handleOk = () => {
+                    closeAllModals();
+                    alertOkBtn.removeEventListener('click', handleOk);
+                    alertCancelBtn.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    closeAllModals();
+                    alertOkBtn.removeEventListener('click', handleOk);
+                    alertCancelBtn.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+
+                alertOkBtn.addEventListener('click', handleOk);
+                alertCancelBtn.addEventListener('click', handleCancel);
+            });
         }
 
-        function loadData() {
-            const savedData = localStorage.getItem('interactiveNovelData');
-            const savedState = localStorage.getItem('interactiveNovelState');
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+        }
 
-            if (savedData) {
-                stories = JSON.parse(savedData);
-            } else {
-                stories = [defaultStory]; // Load default if nothing is saved
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        // --- FIREBASE INITIALIZATION & AUTHENTICATION ---
+        async function initializeFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.warn("Firebase config not found. Running in local-only mode (data will not persist).");
+                isAuthReady = true;
+                userId = crypto.randomUUID(); // Generate a random ID for local-only mode
+                userIdDisplay.textContent = `Your ID: ${userId.substring(0, 8)}... (Local)`;
+                renderAll(); // Render without Firestore
+                return;
             }
 
-            if (savedState) {
-                const loadedState = JSON.parse(savedState);
-                // Only load non-sensitive state, keep author mode off by default
-                state.currentStoryIndex = loadedState.currentStoryIndex || 0;
-                state.currentChapterIndex = loadedState.currentChapterIndex || 0;
-                state.currentPOV = loadedState.currentPOV || 'f';
-            }
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
-            // Ensure indices are valid
-            if (state.currentStoryIndex >= stories.length) state.currentStoryIndex = 0;
-            if (stories.length > 0 && state.currentChapterIndex >= (stories[state.currentStoryIndex]?.chapters?.length || 0)) {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                userId = auth.currentUser.uid;
+                            } else {
+                                const anonUser = await signInAnonymously(auth);
+                                userId = anonUser.user.uid;
+                            }
+                        } catch (error) {
+                            console.error("Firebase authentication failed:", error);
+                            userId = crypto.randomUUID(); // Fallback to a random ID if auth fails
+                            await showCustomAlert("Authentication Error", "Failed to authenticate with Firebase. Data may not save correctly.");
+                        }
+                    }
+                    isAuthReady = true;
+                    console.log("Firebase Auth Ready. User ID:", userId);
+                    userIdDisplay.textContent = `Your ID: ${userId.substring(0, 8)}...`; // Display truncated ID
+                    setupFirestoreListeners(); // Start listening for data
+                });
+            } catch (error) {
+                console.error("Failed to initialize Firebase:", error);
+                await showCustomAlert("Initialization Error", "Failed to initialize Firebase. The app may not function correctly.");
+                userId = crypto.randomUUID(); // Fallback
+                isAuthReady = true;
+                renderAll(); // Try to render anyway
+            }
+        }
+
+        // --- FIRESTORE DATA HANDLING ---
+        function getStoriesCollectionRef() {
+            if (!db) {
+                console.error("Firestore not initialized.");
+                return null;
+            }
+            // Public data for collaboration
+            return collection(db, `artifacts/${appId}/public/data/stories`);
+        }
+
+        function setupFirestoreListeners() {
+            if (!isAuthReady || !db) return;
+
+            const storiesColRef = getStoriesCollectionRef();
+            if (!storiesColRef) return;
+
+            onSnapshot(storiesColRef, (snapshot) => {
+                stories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Sort stories by creation time or title if desired
+                stories.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+
+                if (stories.length === 0) {
+                    // If no stories, create a default one
+                    createDefaultStory();
+                } else {
+                    // Ensure currentStoryId is valid after update
+                    if (!state.currentStoryId || !stories.some(s => s.id === state.currentStoryId)) {
+                        state.currentStoryId = stories[0].id;
+                        state.currentChapterIndex = 0;
+                    }
+                    // Ensure currentChapterIndex is valid for the current story
+                    const currentStory = stories.find(s => s.id === state.currentStoryId);
+                    if (currentStory && state.currentChapterIndex >= (currentStory.chapters?.length || 0)) {
+                        state.currentChapterIndex = 0;
+                    }
+                    renderAll();
+                }
+            }, (error) => {
+                console.error("Error fetching stories:", error);
+                showCustomAlert("Data Error", "Failed to load stories. Please try refreshing.");
+            });
+        }
+
+        async function createDefaultStory() {
+            showLoading();
+            try {
+                const defaultStoryData = {
+                    title: "The Crimson Prophecy",
+                    chapters: [
+                        {
+                            title: "Chapter 1: The Dust Didn’t Speak Back",
+                            f_pov: `I woke with the taste of ash on my tongue.
+Not dust. Not dirt. Ash. Like something old had burned here long ago and kept burning, even after it died.
+
+I didn’t know where I was.
+I didn’t know who I was.
+But I knew—something had ended.
+
+The sky above me wasn’t black or grey. It was just... wrong. A pale, silent sheet of light with no sun, no stars, no beginning. I waited for it to shift, to prove it was real. It didn’t.
+
+And around me? Ruins. Bones of a city with no body. Charred stone. Dry wind. No birds. No noise. Just the sound of my own shallow breath and the faint crackle of air that didn’t feel alive.
+
+I pushed myself up. My body moved like it had done this before—stood up from ruin. Survived. But my mind felt hollow, like a book torn out page by page, leaving only the stains behind.
+
+There was a mark on my chest. Just below the collarbone.
+A broken circle, ink-black and faintly pulsing beneath my skin.
+When I touched it, something pulled—like a scream trying to claw its way out of me. But no sound came.
+
+I didn’t remember my name.
+But the world seemed to know me.
+
+Not with warmth. Not with recognition.
+With hatred.
+Or maybe... grief.
+
+Sometimes, when I stepped forward, the ground cracked like it was angry I existed. Sometimes, the air behind me shifted—like something was following, always just out of sight.
+
+I tried to speak. The words didn’t come. Not even thoughts, not truly. Just impressions. Like something older than language was humming in my bones.
+
+And then—
+A feeling. Sharp. Sudden. Heavy.
+
+Like something buried beneath this world had opened one eye.
+Not a presence. A pressure.
+Hot. Furious. Waiting.
+
+I didn’t know its name.
+But somehow, some piece of me remembered the weight of it.
+A wound that never closed.
+A scream that became silence.
+
+Wrath.
+
+It wasn’t a voice. It wasn’t a god.
+It was a memory of something left behind.
+
+And somehow, it had found me first.`,
+                            m_pov: `The ground was cold beneath me, a stark contrast to the burning in my chest. I opened my eyes to a sky that was a flat, dull grey, reflecting nothing. No sun, no clouds, just an endless, oppressive ceiling.
+
+I was alone. And I was lost. My memories were fragments, like shattered glass – sharp edges but no complete picture. A name, a face, a purpose… all gone.
+
+Around me, the skeletal remains of what might have been a city stretched into the desolate horizon. Twisted metal, crumbling stone, and the silence of a graveyard. No wind stirred, no living thing moved. Only the faint, almost imperceptible hum of something ancient and vast.
+
+My hand went to my side, where a searing pain pulsed. A symbol, etched into my skin, burned with a cold fire. A jagged line, like a broken lightning bolt. It felt… familiar. Like a scar from a battle I couldn’t recall.
+
+A sense of dread, cold and heavy, settled over me. It wasn’t just the desolate landscape; it was something deeper, a pervasive wrongness in the air. This place was a tomb, and I was its only occupant.
+
+I tried to stand, my muscles protesting, but I pushed through the pain. Each step was an effort, a struggle against an unseen force. The air grew heavy, thick with an unspoken accusation.
+
+Then, a whisper. Not a sound, but a thought, a feeling that resonated deep within my bones. A name. Not mine, but something vast and terrible. A power that had once shaped this world, and now lay dormant, waiting.
+
+It was a presence that chilled me to the core, a primal fear that clawed at my throat. I didn’t know what it was, but I knew it was connected to this place, to the ruins, to the mark on my skin.
+
+And then, a flicker. A memory, fleeting and terrifying. A flash of blinding light, a roar that tore the sky, and then… nothing. Just the silence and the ash.
+
+I was a survivor. But of what? And for what purpose? The questions echoed in the emptiness, unanswered. The weight of the world pressed down, and I knew, with a chilling certainty, that my journey had just begun.`
+                        }
+                    ],
+                    glossary: {
+                        "Whispering Woods": "A sentient, ancient forest, rumored to hold forgotten magic and secrets.",
+                        "Sunstone": "A powerful artifact of the Dawn Age, said to harness solar energy and bring light to the darkest places.",
+                    },
+                    createdAt: serverTimestamp(),
+                    createdBy: userId,
+                };
+                const storiesColRef = getStoriesCollectionRef();
+                if (storiesColRef) {
+                    const docRef = await addDoc(storiesColRef, defaultStoryData);
+                    state.currentStoryId = docRef.id;
+                    state.currentChapterIndex = 0;
+                    console.log("Default story created with ID:", docRef.id);
+                }
+            } catch (e) {
+                console.error("Error creating default story:", e);
+                await showCustomAlert("Error", "Failed to create default story. Please try again.");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function updateStoryInFirestore(storyId, data) {
+            if (!isAuthReady || !db) {
+                await showCustomAlert("Error", "App not ready or Firestore not initialized.");
+                return;
+            }
+            showLoading();
+            try {
+                const storyDocRef = doc(db, `artifacts/${appId}/public/data/stories`, storyId);
+                await updateDoc(storyDocRef, {
+                    ...data,
+                    updatedAt: serverTimestamp(),
+                });
+                console.log("Story updated successfully:", storyId);
+            } catch (e) {
+                console.error("Error updating story:", e);
+                await showCustomAlert("Error", `Failed to update story: ${e.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function deleteStoryFromFirestore(storyId) {
+            if (!isAuthReady || !db) {
+                await showCustomAlert("Error", "App not ready or Firestore not initialized.");
+                return;
+            }
+            showLoading();
+            try {
+                const storyDocRef = doc(db, `artifacts/${appId}/public/data/stories`, storyId);
+                await deleteDoc(storyDocRef);
+                console.log("Story deleted successfully:", storyId);
+                state.currentStoryId = null; // Reset current story
                 state.currentChapterIndex = 0;
+            } catch (e) {
+                console.error("Error deleting story:", e);
+                await showCustomAlert("Error", `Failed to delete story: ${e.message}`);
+            } finally {
+                hideLoading();
             }
         }
 
-        // --- CORE FUNCTIONS ---
+        // --- CORE UI RENDERING ---
         function applyTheme() {
-            body.className = '';
-            if (state.isAuthorMode) body.classList.add('author-mode');
+            body.className = ''; // Clear existing classes
             body.classList.add(state.currentPOV === 'f' ? 'theme-f' : 'theme-m');
             povToggleButton.textContent = state.currentPOV === 'f' ? "Switch to Male POV" : "Switch to Female POV";
         }
 
         function renderAll() {
-            if (stories.length === 0 || !stories[state.currentStoryIndex]) {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+
+            if (!currentStory) {
                 displayEmptyState();
                 return;
             }
+
             noContentMessage.classList.add('hidden');
-            chapterContent.classList.remove('hidden'); // Ensure content is visible if stories exist
+            chapterContent.classList.remove('hidden');
             povToggleButton.classList.remove('hidden');
+            prevChapterBtn.classList.remove('hidden');
+            nextChapterBtn.classList.remove('hidden');
+            deleteStoryBtn.classList.remove('hidden');
+            createNewStoryBtn.classList.remove('hidden');
 
-            const story = stories[state.currentStoryIndex];
-            storyTitleHeader.textContent = story.title;
 
+            storyTitleHeader.textContent = currentStory.title;
             applyTheme();
             renderChapter();
             populateStorySelector();
             populateChapterList();
             populateGlossary();
+            populateChapterDropdown(); // Populate the new chapter dropdown
+            updateChapterNavigationButtons();
         }
 
         function renderChapter() {
-            const story = stories[state.currentStoryIndex];
-            if (!story || story.chapters.length === 0) {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory || currentStory.chapters.length === 0) {
                 chapterTitle.textContent = "No Chapters Yet";
                 povIndicator.textContent = "";
-                chapterContent.innerHTML = "<p>Use Author Mode to add the first chapter!</p>";
+                chapterContent.innerHTML = "<p>Add the first chapter below!</p>";
+                chapterSelector.innerHTML = ''; // Clear dropdown
+                chapterSelector.disabled = true;
                 return;
             }
 
-            const chapter = story.chapters[state.currentChapterIndex];
+            const chapter = currentStory.chapters[state.currentChapterIndex];
             const povData = state.currentPOV === 'f' ? chapter.f_pov : chapter.m_pov;
 
             chapterTitle.textContent = chapter.title;
             povIndicator.textContent = `(${state.currentPOV === 'f' ? "Female" : "Male"} POV)`;
             chapterContent.innerHTML = povData || "<p>This point of view has not been written yet.</p>";
 
+            populateChapterDropdown(); // Update dropdown selection
             addGlossaryListeners();
+            updateChapterNavigationButtons();
         }
 
         function displayEmptyState() {
@@ -306,40 +700,62 @@
             chapterTitle.textContent = '';
             povIndicator.textContent = '';
             povToggleButton.classList.add('hidden');
-            populateStorySelector(); // Still show selector
+            prevChapterBtn.classList.add('hidden');
+            nextChapterBtn.classList.add('hidden');
+            deleteStoryBtn.classList.add('hidden'); // Hide delete button if no stories
+            createNewStoryBtn.classList.remove('hidden'); // Always allow creating new story
+            populateStorySelector(); // Still show selector, possibly with "No stories"
             chapterListContainer.innerHTML = ''; // Clear chapter list
             glossaryListContainer.innerHTML = ''; // Clear glossary
+            chapterSelector.innerHTML = ''; // Clear chapter dropdown
+            chapterSelector.disabled = true;
+        }
+
+        function updateChapterNavigationButtons() {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory || currentStory.chapters.length === 0) {
+                prevChapterBtn.disabled = true;
+                nextChapterBtn.disabled = true;
+                prevChapterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                nextChapterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            prevChapterBtn.disabled = state.currentChapterIndex === 0;
+            nextChapterBtn.disabled = state.currentChapterIndex >= currentStory.chapters.length - 1;
+
+            prevChapterBtn.classList.toggle('opacity-50', prevChapterBtn.disabled);
+            prevChapterBtn.classList.toggle('cursor-not-allowed', prevChapterBtn.disabled);
+            nextChapterBtn.classList.toggle('opacity-50', nextChapterBtn.disabled);
+            nextChapterBtn.classList.toggle('cursor-not-allowed', nextChapterBtn.disabled);
         }
 
         // --- UI POPULATION ---
         function populateStorySelector() {
             storySelector.innerHTML = '';
             if (stories.length === 0) {
-                const option = new Option("No stories available", "-1");
+                const option = new Option("No stories available", "");
                 storySelector.add(option);
+                storySelector.disabled = true;
             } else {
-                stories.forEach((story, index) => {
-                    const option = new Option(story.title, index);
+                storySelector.disabled = false;
+                stories.forEach((story) => {
+                    const option = new Option(story.title, story.id);
                     storySelector.add(option);
                 });
-                storySelector.value = state.currentStoryIndex;
-            }
-
-            // Add "Create New" option in author mode
-            if (state.isAuthorMode) {
-                storySelector.add(new Option("+ Create New Story", "new"));
+                storySelector.value = state.currentStoryId;
             }
         }
 
         function populateChapterList() {
             chapterListContainer.innerHTML = '';
-            const story = stories[state.currentStoryIndex];
-            if (!story || !story.chapters) return;
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory || !currentStory.chapters) return;
 
-            story.chapters.forEach((chapter, index) => {
+            currentStory.chapters.forEach((chapter, index) => {
                 const chapterCard = document.createElement('div');
                 chapterCard.className = 'p-4 rounded-lg transition-all duration-300 flex justify-between items-center';
-                chapterCard.style.backgroundColor = 'var(--highlight-bg)';
+                chapterCard.style.backgroundColor = 'var(--highlight-bg-light)';
 
                 const textContent = document.createElement('div');
                 textContent.className = 'cursor-pointer flex-grow';
@@ -352,44 +768,65 @@
 
                 chapterCard.appendChild(textContent);
 
-                if (state.isAuthorMode) {
-                    const buttons = document.createElement('div');
-                    buttons.className = 'flex gap-2 ml-4';
-                    buttons.innerHTML = `
-                        <button data-index="${index}" class="edit-chapter-btn text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Edit</button>
-                        <button data-index="${index}" class="delete-chapter-btn text-xs bg-red-700 hover:bg-red-800 px-2 py-1 rounded">Del</button>
-                    `;
-                    chapterCard.appendChild(buttons);
-                }
+                const buttons = document.createElement('div');
+                buttons.className = 'flex gap-2 ml-4';
+                buttons.innerHTML = `
+                    <button data-index="${index}" class="edit-chapter-btn button primary text-xs px-2 py-1 rounded">Edit</button>
+                    <button data-index="${index}" class="delete-chapter-btn button danger text-xs px-2 py-1 rounded">Del</button>
+                `;
+                chapterCard.appendChild(buttons);
                 chapterListContainer.appendChild(chapterCard);
             });
         }
 
         function populateGlossary() {
             glossaryListContainer.innerHTML = '';
-            const story = stories[state.currentStoryIndex];
-            if (!story || !story.glossary) return;
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory || !currentStory.glossary) return;
 
-            const sortedTerms = Object.keys(story.glossary).sort();
+            const sortedTerms = Object.keys(currentStory.glossary).sort();
             sortedTerms.forEach(term => {
                 const item = document.createElement('div');
                 item.className = 'p-4 rounded-lg flex justify-between items-start';
-                item.style.backgroundColor = 'var(--highlight-bg)';
+                item.style.backgroundColor = 'var(--highlight-bg-light)';
                 item.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-lg" style="color: var(--accent-color);">${term}</h4>
-                        <p class="mt-1">${story.glossary[term]}</p>
+                        <h4 class="font-bold text-lg">${term}</h4>
+                        <p class="mt-1">${currentStory.glossary[term]}</p>
                     </div>
-                    ${state.isAuthorMode ? `<button data-term="${term}" class="delete-glossary-btn text-xs bg-red-700 hover:bg-red-800 px-2 py-1 rounded ml-4">Del</button>` : ''}
+                    <button data-term="${term}" class="delete-glossary-btn button danger text-xs px-2 py-1 rounded ml-4">Del</button>
                 `;
                 glossaryListContainer.appendChild(item);
             });
         }
 
+        function populateChapterDropdown() {
+            chapterSelector.innerHTML = '';
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+
+            if (!currentStory || currentStory.chapters.length === 0) {
+                chapterSelector.disabled = true;
+                return;
+            }
+
+            chapterSelector.disabled = false;
+            currentStory.chapters.forEach((chapter, index) => {
+                const option = new Option(`Chapter ${index + 1}`, index);
+                chapterSelector.add(option);
+            });
+            chapterSelector.value = state.currentChapterIndex;
+        }
+
         // --- EVENT HANDLERS & ACTIONS ---
         function togglePOV() {
+            // Add click animation class
+            povToggleButton.classList.add('clicked');
+            // Remove after animation
+            setTimeout(() => {
+                povToggleButton.classList.remove('clicked');
+            }, 200); // Match this to your CSS transition duration
+
             state.currentPOV = state.currentPOV === 'f' ? 'm' : 'f';
-            saveData();
             applyTheme();
             renderChapter();
         }
@@ -408,99 +845,137 @@
 
         function addGlossaryListeners() {
             document.querySelectorAll('.glossary-term').forEach(termEl => {
-                termEl.addEventListener('click', (e) => {
+                termEl.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const term = e.target.textContent;
-                    const story = stories[state.currentStoryIndex];
-                    if (story && story.glossary && story.glossary[term]) {
+                    const currentStory = stories.find(s => s.id === state.currentStoryId);
+                    if (currentStory && currentStory.glossary && currentStory.glossary[term]) {
                         modalTerm.textContent = term;
-                        modalDefinition.textContent = story.glossary[term];
+                        modalDefinition.textContent = currentStory.glossary[term];
                         modalBackdrop.classList.remove('hidden');
                         glossaryModalContent.classList.remove('hidden');
+                    } else {
+                        await showCustomAlert("Not Found", `Definition for "${term}" not found.`);
                     }
                 });
             });
         }
 
-        function handleAuthorModeToggle() {
-            state.isAuthorMode = authorModeToggle.checked;
-            body.classList.toggle('author-mode', state.isAuthorMode);
-            saveData(); // Save author mode state
-            renderAll(); // Re-render everything to show/hide author UI
-        }
-
         // Story Actions
         storySelector.addEventListener('change', () => {
-            if (storySelector.value === 'new') {
-                newStoryTitleInput.value = '';
-                modalBackdrop.classList.remove('hidden');
-                addStoryModalContent.classList.remove('hidden');
-                storySelector.value = state.currentStoryIndex; // Reset selector
-            } else {
-                state.currentStoryIndex = parseInt(storySelector.value, 10);
-                state.currentChapterIndex = 0;
-                saveData();
-                renderAll();
-            }
+            state.currentStoryId = storySelector.value;
+            state.currentChapterIndex = 0;
+            renderAll();
         });
 
-        saveStoryBtn.addEventListener('click', () => {
-            const title = newStoryTitleInput.value.trim();
-            if (title) {
-                stories.push({ title: title, chapters: [], glossary: {} });
-                state.currentStoryIndex = stories.length - 1;
-                state.currentChapterIndex = 0;
-                saveData();
-                renderAll();
-                closeAllModals();
-            } else {
-                alert("Story title cannot be empty.");
-            }
-        });
-
-        deleteStoryBtn.addEventListener('click', () => {
-             if (stories.length > 0 && confirm(`Are you sure you want to delete the story "${stories[state.currentStoryIndex].title}"? This cannot be undone.`)) {
-                stories.splice(state.currentStoryIndex, 1);
-                state.currentStoryIndex = 0;
-                state.currentChapterIndex = 0;
-                saveData();
-                if (stories.length === 0) {
-                    displayEmptyState();
-                    populateStorySelector();
-                } else {
-                    renderAll();
+        createNewStoryBtn.addEventListener('click', async () => {
+            const title = await showCustomAlert("Create New Story", "Enter story title:", true);
+            if (title && typeof title === 'string' && title.trim() !== '') {
+                showLoading();
+                try {
+                    const newStoryData = {
+                        title: title.trim(),
+                        chapters: [],
+                        glossary: {},
+                        createdAt: serverTimestamp(),
+                        createdBy: userId,
+                    };
+                    const storiesColRef = getStoriesCollectionRef();
+                    if (storiesColRef) {
+                        const docRef = await addDoc(storiesColRef, newStoryData);
+                        state.currentStoryId = docRef.id;
+                        state.currentChapterIndex = 0;
+                        console.log("New story created with ID:", docRef.id);
+                    }
+                } catch (e) {
+                    console.error("Error creating new story:", e);
+                    await showCustomAlert("Error", `Failed to create new story: ${e.message}`);
+                } finally {
+                    hideLoading();
                 }
+            } else if (title === false) {
+                // User cancelled the prompt
+            } else {
+                await showCustomAlert("Input Error", "Story title cannot be empty.");
             }
         });
+
+
+        deleteStoryBtn.addEventListener('click', async () => {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory) {
+                await showCustomAlert("No Story", "There is no story to delete.");
+                return;
+            }
+
+            const confirmed = await showCustomAlert("Confirm Deletion", `Are you sure you want to delete the story "${currentStory.title}"? This cannot be undone.`, true);
+            if (confirmed) {
+                await deleteStoryFromFirestore(state.currentStoryId);
+            }
+        });
+
+        // Chapter Navigation Actions
+        prevChapterBtn.addEventListener('click', () => {
+            if (state.currentChapterIndex > 0) {
+                state.currentChapterIndex--;
+                renderChapter();
+            }
+        });
+
+        nextChapterBtn.addEventListener('click', () => {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (currentStory && state.currentChapterIndex < currentStory.chapters.length - 1) {
+                state.currentChapterIndex++;
+                renderChapter();
+            }
+        });
+
+        // Chapter Selector Dropdown Change
+        chapterSelector.addEventListener('change', (e) => {
+            state.currentChapterIndex = parseInt(e.target.value, 10);
+            renderChapter();
+        });
+
 
         // Chapter Actions
-        saveChapterBtn.addEventListener('click', () => {
+        saveChapterBtn.addEventListener('click', async () => {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory) {
+                await showCustomAlert("No Story Selected", "Please create or select a story first.");
+                return;
+            }
+
             const title = newChapterTitle.value.trim();
             const f_pov = newChapterFPov.value.trim();
             const m_pov = newChapterMPov.value.trim();
+
             if (!title) {
-                alert("Chapter title is required.");
+                await showCustomAlert("Input Required", "Chapter title is required.");
                 return;
             }
+
             const chapterData = { title, f_pov, m_pov };
-            const story = stories[state.currentStoryIndex];
+            const updatedChapters = [...(currentStory.chapters || [])];
 
             if (state.editingChapterIndex !== null) {
-                story.chapters[state.editingChapterIndex] = chapterData;
+                updatedChapters[state.editingChapterIndex] = chapterData;
             } else {
-                story.chapters.push(chapterData);
+                updatedChapters.push(chapterData);
             }
 
+            await updateStoryInFirestore(state.currentStoryId, { chapters: updatedChapters });
+
             state.editingChapterIndex = null;
-            saveData();
-            renderAll();
             resetChapterForm();
         });
 
-        chapterListContainer.addEventListener('click', (e) => {
+        chapterListContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('edit-chapter-btn')) {
                 const index = parseInt(e.target.dataset.index, 10);
-                const chapter = stories[state.currentStoryIndex].chapters[index];
+                const currentStory = stories.find(s => s.id === state.currentStoryId);
+                if (!currentStory || !currentStory.chapters[index]) return;
+
+                const chapter = currentStory.chapters[index];
                 state.editingChapterIndex = index;
 
                 chapterFormTitle.textContent = "Edit Chapter";
@@ -513,16 +988,22 @@
             }
             if (e.target.classList.contains('delete-chapter-btn')) {
                 const index = parseInt(e.target.dataset.index, 10);
-                if (confirm('Are you sure you want to delete this chapter?')) {
-                    stories[state.currentStoryIndex].chapters.splice(index, 1);
+                const currentStory = stories.find(s => s.id === state.currentStoryId);
+                if (!currentStory || !currentStory.chapters[index]) return;
+
+                const confirmed = await showCustomAlert("Confirm Deletion", 'Are you sure you want to delete this chapter?', true);
+                if (confirmed) {
+                    const updatedChapters = [...(currentStory.chapters || [])];
+                    updatedChapters.splice(index, 1);
+
                     // Adjust current chapter index if the deleted chapter was before it
                     if (state.currentChapterIndex >= index && state.currentChapterIndex > 0) {
                         state.currentChapterIndex--;
-                    } else if (stories[state.currentStoryIndex]?.chapters?.length === 0) {
+                    } else if (updatedChapters.length === 0) {
                         state.currentChapterIndex = 0; // If last chapter deleted
                     }
-                    saveData();
-                    renderAll();
+
+                    await updateStoryInFirestore(state.currentStoryId, { chapters: updatedChapters });
                 }
             }
         });
@@ -540,31 +1021,37 @@
         }
 
         // Glossary Actions
-        saveGlossaryBtn.addEventListener('click', () => {
+        saveGlossaryBtn.addEventListener('click', async () => {
+            const currentStory = stories.find(s => s.id === state.currentStoryId);
+            if (!currentStory) {
+                await showCustomAlert("No Story Selected", "Please create or select a story first.");
+                return;
+            }
+
             const term = newGlossaryTerm.value.trim();
             const definition = newGlossaryDefinition.value.trim();
             if (term && definition) {
-                // Initialize glossary if it doesn't exist
-                if (!stories[state.currentStoryIndex].glossary) {
-                    stories[state.currentStoryIndex].glossary = {};
-                }
-                stories[state.currentStoryIndex].glossary[term] = definition;
-                saveData();
-                populateGlossary();
+                const updatedGlossary = { ...(currentStory.glossary || {}) };
+                updatedGlossary[term] = definition;
+                await updateStoryInFirestore(state.currentStoryId, { glossary: updatedGlossary });
                 newGlossaryTerm.value = '';
                 newGlossaryDefinition.value = '';
             } else {
-                alert("Glossary term and definition cannot be empty.");
+                await showCustomAlert("Input Required", "Glossary term and definition cannot be empty.");
             }
         });
 
-        glossaryListContainer.addEventListener('click', (e) => {
+        glossaryListContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-glossary-btn')) {
                 const term = e.target.dataset.term;
-                if (confirm(`Are you sure you want to delete the term "${term}"?`)) {
-                    delete stories[state.currentStoryIndex].glossary[term];
-                    saveData();
-                    populateGlossary();
+                const currentStory = stories.find(s => s.id === state.currentStoryId);
+                if (!currentStory || !currentStory.glossary || !currentStory.glossary[term]) return;
+
+                const confirmed = await showCustomAlert("Confirm Deletion", `Are you sure you want to delete the term "${term}"?`, true);
+                if (confirmed) {
+                    const updatedGlossary = { ...(currentStory.glossary || {}) };
+                    delete updatedGlossary[term];
+                    await updateStoryInFirestore(state.currentStoryId, { glossary: updatedGlossary });
                 }
             }
         });
@@ -573,7 +1060,7 @@
         function closeAllModals() {
             modalBackdrop.classList.add('hidden');
             glossaryModalContent.classList.add('hidden');
-            addStoryModalContent.classList.add('hidden');
+            customAlertModal.classList.add('hidden');
         }
 
         modalBackdrop.addEventListener('click', (e) => {
@@ -584,20 +1071,17 @@
         document.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', closeAllModals));
 
         // --- INITIALIZATION ---
-        loadData();
-        renderAll(); // Initial render to populate content and apply theme
-
-        // Set initial state of author mode toggle based on loaded state
-        authorModeToggle.checked = state.isAuthorMode;
-
-
-        // Final Event Listeners
-        povToggleButton.addEventListener('click', togglePOV);
-        authorModeToggle.addEventListener('change', handleAuthorModeToggle);
-        navItems.forEach(item => {
-            item.addEventListener('click', () => switchView(item.dataset.target));
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFirebase(); // Start Firebase init and auth
+            // Initial UI setup, will be updated by Firestore listener
+            switchView('reader');
+            displayEmptyState(); // Show empty state until data loads
+            povToggleButton.addEventListener('click', togglePOV);
+            navItems.forEach(item => {
+                item.addEventListener('click', () => switchView(item.dataset.target));
+            });
         });
-    });
     </script>
 </body>
 </html>
+
