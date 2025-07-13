@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Novel Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Lora', serif;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        h1, h2, h3, .nav-item, .button, button, input, select, textarea {
+            font-family: 'Inter', sans-serif;
+        }
+        .theme-f {
+            --bg-color: #4a1d2e; /* Deep Burgundy */
+            --text-color: #f3e5e4; /* Pale Rose */
+            --accent-color: #e5a9a9; /* Muted Pink */
+            --highlight-bg: #6b2d43; /* Darker Burgundy */
+            --input-bg: #8a3b58;
+        }
+        .theme-m {
+            --bg-color: #1e293b; /* Slate Blue */
+            --text-color: #e2e8f0; /* Light Slate */
+            --accent-color: #94a3b8; /* Lighter Slate */
+            --highlight-bg: #334155; /* Darker Slate */
+            --input-bg: #475569;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .glossary-term {
+            cursor: pointer;
+            color: var(--accent-color);
+            font-weight: bold;
+            text-decoration: underline dotted;
+            text-decoration-thickness: 1px;
+        }
+        .prose { color: var(--text-color); }
+        .prose p { margin-bottom: 1em; }
+        .nav-item.active { background-color: var(--highlight-bg); }
+        .modal-content, .author-form { background-color: var(--highlight-bg); }
+        .author-mode-ui { display: none; }
+        body.author-mode .author-mode-ui { display: block; }
+        .author-form input, .author-form textarea, .author-form select {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+        }
+        .author-form input::placeholder, .author-form textarea::placeholder {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="sticky top-0 z-20 shadow-lg" style="background-color: var(--highlight-bg);">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 id="story-title-header" class="text-xl md:text-2xl font-bold" style="color: var(--accent-color);"></h1>
+            <div class="flex items-center space-x-2">
+                <button id="pov-toggle-btn" class="button px-3 py-1.5 text-sm font-bold rounded-md transition-all duration-300">Switch POV</button>
+                <label for="author-mode-toggle" class="text-sm cursor-pointer select-none">Author Mode</label>
+                <input type="checkbox" id="author-mode-toggle" class="ml-1 h-4 w-4 rounded">
+            </div>
+        </div>
+    </header> <main class="container mx-auto p-4 md:p-6">
+
+        <div id="reader-view" class="main-section">
+            <h2 id="chapter-title" class="text-2xl md:text-3xl font-bold mb-2 text-center" style="color: var(--accent-color);"></h2>
+            <p id="pov-indicator" class="text-center italic mb-6"></p>
+            <div id="chapter-content" class="prose prose-lg max-w-none leading-relaxed"></div>
+            <div id="no-content-message" class="text-center py-10">
+                <h2 class="text-2xl font-bold mb-4">Welcome!</h2>
+                <p>It looks like there are no stories yet.</p>
+                <p class="mt-2">Enable "Author Mode" in the top-right corner to start creating.</p>
+            </div>
+        </div>
+
+        <div id="management-view" class="main-section hidden">
+            <div class="mb-6">
+                <label for="story-selector" class="block mb-2 font-bold">Current Story</label>
+                <div class="flex gap-2">
+                    <select id="story-selector" class="w-full p-2 rounded-md"></select>
+                    <button id="delete-story-btn" class="author-mode-ui button bg-red-700 hover:bg-red-800 px-3 py-2 rounded-md">Delete</button>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--accent-color);">Chapter List</h2>
+            <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+            <div class="author-mode-ui mt-8">
+                <div class="author-form p-6 rounded-lg">
+                    <h3 id="chapter-form-title" class="text-xl font-bold mb-4">Add New Chapter</h3>
+                    <input type="hidden" id="chapter-edit-index">
+                    <input id="new-chapter-title" type="text" placeholder="Chapter Title" class="w-full p-2 mb-2 rounded-md">
+                    <textarea id="new-chapter-f-pov" placeholder="Female POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
+                    <textarea id="new-chapter-m-pov" placeholder="Male POV Content" rows="5" class="w-full p-2 mb-2 rounded-md"></textarea>
+                    <div class="flex gap-2">
+                        <button id="save-chapter-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Save Chapter</button>
+                        <button id="cancel-edit-chapter-btn" class="button bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md hidden">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="world-view" class="main-section hidden">
+             <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--accent-color);">Glossary</h2>
+            <div id="glossary-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <div class="author-mode-ui mt-8">
+                <div class="author-form p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4">Add/Edit Glossary Term</h3>
+                    <input id="new-glossary-term" type="text" placeholder="Term" class="w-full p-2 mb-2 rounded-md">
+                    <textarea id="new-glossary-definition" placeholder="Definition" rows="3" class="w-full p-2 mb-2 rounded-md"></textarea>
+                    <button id="save-glossary-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Save Term</button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="fixed bottom-0 left-0 right-0 z-30" style="background-color: var(--highlight-bg);">
+            <div class="container mx-auto flex justify-around border-t" style="border-color: var(--bg-color);">
+                <button data-target="reader" class="nav-item flex-1 py-3 text-center font-semibold active">Read</button>
+                <button data-target="management" class="nav-item flex-1 py-3 text-center font-semibold">Chapters</button>
+                <button data-target="world" class="nav-item flex-1 py-3 text-center font-semibold">World</button>
+            </div>
+        </nav>
+    </main>
+
+    <div id="modal-backdrop" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 hidden">
+        <div id="glossary-modal-content" class="modal-content w-full max-w-md p-6 rounded-lg shadow-xl relative hidden">
+            <h3 id="modal-term" class="text-2xl font-bold mb-3" style="color: var(--accent-color);"></h3>
+            <p id="modal-definition" class="text-base"></p>
+            <button class="close-modal-btn absolute top-3 right-3 text-2xl font-bold">&times;</button>
+        </div>
+        <div id="add-story-modal-content" class="modal-content w-full max-w-md p-6 rounded-lg shadow-xl relative hidden">
+            <h3 class="text-2xl font-bold mb-4" style="color: var(--accent-color);">Create New Story</h3>
+            <input id="new-story-title" type="text" placeholder="Story Title" class="w-full p-2 mb-4 rounded-md author-form">
+            <div class="flex justify-end gap-2">
+                 <button class="close-modal-btn button bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md">Cancel</button>
+                 <button id="save-story-btn" class="button bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md">Create</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA STORE ---
+        let stories = [];
+
+        const defaultStory = {
+            title: "The Crimson Prophecy",
+            chapters: [
+                {
+                    title: "Chapter 1: The Whispering Woods",
+                    f_pov: `The air in the <span class="glossary-term">Whispering Woods</span> was thick with an ancient stillness. I clutched the <span class="glossary-term">Sunstone</span> in my pocket...`,
+                    m_pov: `This forest was a cursed place. The <span class="glossary-term">Whispering Woods</span> played tricks on the mind...`
+                }
+            ],
+            glossary: {
+                "Whispering Woods": "A sentient, ancient forest...",
+                "Sunstone": "A powerful artifact of the Dawn Age...",
+            }
+        };
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            currentStoryIndex: 0,
+            currentChapterIndex: 0,
+            currentPOV: 'f',
+            isAuthorMode: false,
+            editingChapterIndex: null,
+        };
+
+        // --- DOM ELEMENTS ---
+        const body = document.body;
+        const povToggleButton = document.getElementById('pov-toggle-btn');
+        const chapterTitle = document.getElementById('chapter-title');
+        const povIndicator = document.getElementById('pov-indicator');
+        const chapterContent = document.getElementById('chapter-content');
+        const storyTitleHeader = document.getElementById('story-title-header');
+        const noContentMessage = document.getElementById('no-content-message');
+
+        const mainSections = document.querySelectorAll('.main-section');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        const authorModeToggle = document.getElementById('author-mode-toggle');
+
+        // Story Management
+        const storySelector = document.getElementById('story-selector');
+        const deleteStoryBtn = document.getElementById('delete-story-btn');
+
+        // Chapter Management
+        const chapterListContainer = document.getElementById('chapter-list');
+        const chapterFormTitle = document.getElementById('chapter-form-title');
+        const newChapterTitle = document.getElementById('new-chapter-title');
+        const newChapterFPov = document.getElementById('new-chapter-f-pov');
+        const newChapterMPov = document.getElementById('new-chapter-m-pov');
+        const saveChapterBtn = document.getElementById('save-chapter-btn');
+        const cancelEditChapterBtn = document.getElementById('cancel-edit-chapter-btn');
+        const chapterEditIndexInput = document.getElementById('chapter-edit-index');
+
+        // Glossary Management
+        const glossaryListContainer = document.getElementById('glossary-list');
+        const newGlossaryTerm = document.getElementById('new-glossary-term');
+        const newGlossaryDefinition = document.getElementById('new-glossary-definition');
+        const saveGlossaryBtn = document.getElementById('save-glossary-btn');
+
+        // Modals
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const glossaryModalContent = document.getElementById('glossary-modal-content');
+        const addStoryModalContent = document.getElementById('add-story-modal-content');
+        const modalTerm = document.getElementById('modal-term');
+        const modalDefinition = document.getElementById('modal-definition');
+        const newStoryTitleInput = document.getElementById('new-story-title');
+        const saveStoryBtn = document.getElementById('save-story-btn');
+
+        // --- DATA HANDLING ---
+        function saveData() {
+            localStorage.setItem('interactiveNovelData', JSON.stringify(stories));
+            localStorage.setItem('interactiveNovelState', JSON.stringify(state));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('interactiveNovelData');
+            const savedState = localStorage.getItem('interactiveNovelState');
+
+            if (savedData) {
+                stories = JSON.parse(savedData);
+            } else {
+                stories = [defaultStory]; // Load default if nothing is saved
+            }
+
+            if (savedState) {
+                const loadedState = JSON.parse(savedState);
+                // Only load non-sensitive state, keep author mode off by default
+                state.currentStoryIndex = loadedState.currentStoryIndex || 0;
+                state.currentChapterIndex = loadedState.currentChapterIndex || 0;
+                state.currentPOV = loadedState.currentPOV || 'f';
+            }
+
+            // Ensure indices are valid
+            if (state.currentStoryIndex >= stories.length) state.currentStoryIndex = 0;
+            if (stories.length > 0 && state.currentChapterIndex >= (stories[state.currentStoryIndex]?.chapters?.length || 0)) {
+                state.currentChapterIndex = 0;
+            }
+        }
+
+        // --- CORE FUNCTIONS ---
+        function applyTheme() {
+            body.className = '';
+            if (state.isAuthorMode) body.classList.add('author-mode');
+            body.classList.add(state.currentPOV === 'f' ? 'theme-f' : 'theme-m');
+            povToggleButton.textContent = state.currentPOV === 'f' ? "Switch to Male POV" : "Switch to Female POV";
+        }
+
+        function renderAll() {
+            if (stories.length === 0 || !stories[state.currentStoryIndex]) {
+                displayEmptyState();
+                return;
+            }
+            noContentMessage.classList.add('hidden');
+            chapterContent.classList.remove('hidden'); // Ensure content is visible if stories exist
+            povToggleButton.classList.remove('hidden');
+
+            const story = stories[state.currentStoryIndex];
+            storyTitleHeader.textContent = story.title;
+
+            applyTheme();
+            renderChapter();
+            populateStorySelector();
+            populateChapterList();
+            populateGlossary();
+        }
+
+        function renderChapter() {
+            const story = stories[state.currentStoryIndex];
+            if (!story || story.chapters.length === 0) {
+                chapterTitle.textContent = "No Chapters Yet";
+                povIndicator.textContent = "";
+                chapterContent.innerHTML = "<p>Use Author Mode to add the first chapter!</p>";
+                return;
+            }
+
+            const chapter = story.chapters[state.currentChapterIndex];
+            const povData = state.currentPOV === 'f' ? chapter.f_pov : chapter.m_pov;
+
+            chapterTitle.textContent = chapter.title;
+            povIndicator.textContent = `(${state.currentPOV === 'f' ? "Female" : "Male"} POV)`;
+            chapterContent.innerHTML = povData || "<p>This point of view has not been written yet.</p>";
+
+            addGlossaryListeners();
+        }
+
+        function displayEmptyState() {
+            storyTitleHeader.textContent = "Interactive Novel";
+            noContentMessage.classList.remove('hidden');
+            chapterContent.classList.add('hidden');
+            chapterTitle.textContent = '';
+            povIndicator.textContent = '';
+            povToggleButton.classList.add('hidden');
+            populateStorySelector(); // Still show selector
+            chapterListContainer.innerHTML = ''; // Clear chapter list
+            glossaryListContainer.innerHTML = ''; // Clear glossary
+        }
+
+        // --- UI POPULATION ---
+        function populateStorySelector() {
+            storySelector.innerHTML = '';
+            if (stories.length === 0) {
+                const option = new Option("No stories available", "-1");
+                storySelector.add(option);
+            } else {
+                stories.forEach((story, index) => {
+                    const option = new Option(story.title, index);
+                    storySelector.add(option);
+                });
+                storySelector.value = state.currentStoryIndex;
+            }
+
+            // Add "Create New" option in author mode
+            if (state.isAuthorMode) {
+                storySelector.add(new Option("+ Create New Story", "new"));
+            }
+        }
+
+        function populateChapterList() {
+            chapterListContainer.innerHTML = '';
+            const story = stories[state.currentStoryIndex];
+            if (!story || !story.chapters) return;
+
+            story.chapters.forEach((chapter, index) => {
+                const chapterCard = document.createElement('div');
+                chapterCard.className = 'p-4 rounded-lg transition-all duration-300 flex justify-between items-center';
+                chapterCard.style.backgroundColor = 'var(--highlight-bg)';
+
+                const textContent = document.createElement('div');
+                textContent.className = 'cursor-pointer flex-grow';
+                textContent.innerHTML = `<h3 class="font-bold text-lg">${chapter.title}</h3>`;
+                textContent.addEventListener('click', () => {
+                    state.currentChapterIndex = index;
+                    renderChapter();
+                    switchView('reader');
+                });
+
+                chapterCard.appendChild(textContent);
+
+                if (state.isAuthorMode) {
+                    const buttons = document.createElement('div');
+                    buttons.className = 'flex gap-2 ml-4';
+                    buttons.innerHTML = `
+                        <button data-index="${index}" class="edit-chapter-btn text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Edit</button>
+                        <button data-index="${index}" class="delete-chapter-btn text-xs bg-red-700 hover:bg-red-800 px-2 py-1 rounded">Del</button>
+                    `;
+                    chapterCard.appendChild(buttons);
+                }
+                chapterListContainer.appendChild(chapterCard);
+            });
+        }
+
+        function populateGlossary() {
+            glossaryListContainer.innerHTML = '';
+            const story = stories[state.currentStoryIndex];
+            if (!story || !story.glossary) return;
+
+            const sortedTerms = Object.keys(story.glossary).sort();
+            sortedTerms.forEach(term => {
+                const item = document.createElement('div');
+                item.className = 'p-4 rounded-lg flex justify-between items-start';
+                item.style.backgroundColor = 'var(--highlight-bg)';
+                item.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-lg" style="color: var(--accent-color);">${term}</h4>
+                        <p class="mt-1">${story.glossary[term]}</p>
+                    </div>
+                    ${state.isAuthorMode ? `<button data-term="${term}" class="delete-glossary-btn text-xs bg-red-700 hover:bg-red-800 px-2 py-1 rounded ml-4">Del</button>` : ''}
+                `;
+                glossaryListContainer.appendChild(item);
+            });
+        }
+
+        // --- EVENT HANDLERS & ACTIONS ---
+        function togglePOV() {
+            state.currentPOV = state.currentPOV === 'f' ? 'm' : 'f';
+            saveData();
+            applyTheme();
+            renderChapter();
+        }
+
+        function switchView(targetId) {
+            mainSections.forEach(section => section.classList.add('hidden'));
+            document.getElementById(`${targetId}-view`).classList.remove('hidden');
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.target === targetId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function addGlossaryListeners() {
+            document.querySelectorAll('.glossary-term').forEach(termEl => {
+                termEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const term = e.target.textContent;
+                    const story = stories[state.currentStoryIndex];
+                    if (story && story.glossary && story.glossary[term]) {
+                        modalTerm.textContent = term;
+                        modalDefinition.textContent = story.glossary[term];
+                        modalBackdrop.classList.remove('hidden');
+                        glossaryModalContent.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        function handleAuthorModeToggle() {
+            state.isAuthorMode = authorModeToggle.checked;
+            body.classList.toggle('author-mode', state.isAuthorMode);
+            saveData(); // Save author mode state
+            renderAll(); // Re-render everything to show/hide author UI
+        }
+
+        // Story Actions
+        storySelector.addEventListener('change', () => {
+            if (storySelector.value === 'new') {
+                newStoryTitleInput.value = '';
+                modalBackdrop.classList.remove('hidden');
+                addStoryModalContent.classList.remove('hidden');
+                storySelector.value = state.currentStoryIndex; // Reset selector
+            } else {
+                state.currentStoryIndex = parseInt(storySelector.value, 10);
+                state.currentChapterIndex = 0;
+                saveData();
+                renderAll();
+            }
+        });
+
+        saveStoryBtn.addEventListener('click', () => {
+            const title = newStoryTitleInput.value.trim();
+            if (title) {
+                stories.push({ title: title, chapters: [], glossary: {} });
+                state.currentStoryIndex = stories.length - 1;
+                state.currentChapterIndex = 0;
+                saveData();
+                renderAll();
+                closeAllModals();
+            } else {
+                alert("Story title cannot be empty.");
+            }
+        });
+
+        deleteStoryBtn.addEventListener('click', () => {
+             if (stories.length > 0 && confirm(`Are you sure you want to delete the story "${stories[state.currentStoryIndex].title}"? This cannot be undone.`)) {
+                stories.splice(state.currentStoryIndex, 1);
+                state.currentStoryIndex = 0;
+                state.currentChapterIndex = 0;
+                saveData();
+                if (stories.length === 0) {
+                    displayEmptyState();
+                    populateStorySelector();
+                } else {
+                    renderAll();
+                }
+            }
+        });
+
+        // Chapter Actions
+        saveChapterBtn.addEventListener('click', () => {
+            const title = newChapterTitle.value.trim();
+            const f_pov = newChapterFPov.value.trim();
+            const m_pov = newChapterMPov.value.trim();
+            if (!title) {
+                alert("Chapter title is required.");
+                return;
+            }
+            const chapterData = { title, f_pov, m_pov };
+            const story = stories[state.currentStoryIndex];
+
+            if (state.editingChapterIndex !== null) {
+                story.chapters[state.editingChapterIndex] = chapterData;
+            } else {
+                story.chapters.push(chapterData);
+            }
+
+            state.editingChapterIndex = null;
+            saveData();
+            renderAll();
+            resetChapterForm();
+        });
+
+        chapterListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-chapter-btn')) {
+                const index = parseInt(e.target.dataset.index, 10);
+                const chapter = stories[state.currentStoryIndex].chapters[index];
+                state.editingChapterIndex = index;
+
+                chapterFormTitle.textContent = "Edit Chapter";
+                newChapterTitle.value = chapter.title;
+                newChapterFPov.value = chapter.f_pov;
+                newChapterMPov.value = chapter.m_pov;
+                cancelEditChapterBtn.classList.remove('hidden');
+                saveChapterBtn.textContent = 'Update Chapter';
+                newChapterTitle.focus();
+            }
+            if (e.target.classList.contains('delete-chapter-btn')) {
+                const index = parseInt(e.target.dataset.index, 10);
+                if (confirm('Are you sure you want to delete this chapter?')) {
+                    stories[state.currentStoryIndex].chapters.splice(index, 1);
+                    // Adjust current chapter index if the deleted chapter was before it
+                    if (state.currentChapterIndex >= index && state.currentChapterIndex > 0) {
+                        state.currentChapterIndex--;
+                    } else if (stories[state.currentStoryIndex]?.chapters?.length === 0) {
+                        state.currentChapterIndex = 0; // If last chapter deleted
+                    }
+                    saveData();
+                    renderAll();
+                }
+            }
+        });
+
+        cancelEditChapterBtn.addEventListener('click', resetChapterForm);
+
+        function resetChapterForm() {
+            state.editingChapterIndex = null;
+            chapterFormTitle.textContent = "Add New Chapter";
+            newChapterTitle.value = '';
+            newChapterFPov.value = '';
+            newChapterMPov.value = '';
+            cancelEditChapterBtn.classList.add('hidden');
+            saveChapterBtn.textContent = 'Save Chapter';
+        }
+
+        // Glossary Actions
+        saveGlossaryBtn.addEventListener('click', () => {
+            const term = newGlossaryTerm.value.trim();
+            const definition = newGlossaryDefinition.value.trim();
+            if (term && definition) {
+                // Initialize glossary if it doesn't exist
+                if (!stories[state.currentStoryIndex].glossary) {
+                    stories[state.currentStoryIndex].glossary = {};
+                }
+                stories[state.currentStoryIndex].glossary[term] = definition;
+                saveData();
+                populateGlossary();
+                newGlossaryTerm.value = '';
+                newGlossaryDefinition.value = '';
+            } else {
+                alert("Glossary term and definition cannot be empty.");
+            }
+        });
+
+        glossaryListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-glossary-btn')) {
+                const term = e.target.dataset.term;
+                if (confirm(`Are you sure you want to delete the term "${term}"?`)) {
+                    delete stories[state.currentStoryIndex].glossary[term];
+                    saveData();
+                    populateGlossary();
+                }
+            }
+        });
+
+        // Modal Closing
+        function closeAllModals() {
+            modalBackdrop.classList.add('hidden');
+            glossaryModalContent.classList.add('hidden');
+            addStoryModalContent.classList.add('hidden');
+        }
+
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) {
+                closeAllModals();
+            }
+        });
+        document.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', closeAllModals));
+
+        // --- INITIALIZATION ---
+        loadData();
+        renderAll(); // Initial render to populate content and apply theme
+
+        // Set initial state of author mode toggle based on loaded state
+        authorModeToggle.checked = state.isAuthorMode;
+
+
+        // Final Event Listeners
+        povToggleButton.addEventListener('click', togglePOV);
+        authorModeToggle.addEventListener('change', handleAuthorModeToggle);
+        navItems.forEach(item => {
+            item.addEventListener('click', () => switchView(item.dataset.target));
+        });
+    });
+    </script>
+</body>
+</html>
